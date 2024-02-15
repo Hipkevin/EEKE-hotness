@@ -18,6 +18,7 @@ def set_seed(seed=7):
     torch.cuda.manual_seed(seed)
     torch.backends.cudnn.deterministic = True
 
+
 def get_classes(module):
     """
     获取模型名称及类名
@@ -31,6 +32,7 @@ def get_classes(module):
             classes[name] = obj
 
     return classes
+
 
 def main():
     MODELS = get_classes(util.model)
@@ -49,6 +51,7 @@ def main():
     window_size = args.window_size
     epochs = args.epochs_num
     cv = args.cv
+    args.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # 数据接口
     graph_list = []
@@ -71,7 +74,7 @@ def main():
 
         graph_list.append(graph)
 
-    model = MODELS[args.model](args)
+    model = MODELS[args.model](args).to(args.device)
 
     criterion = torch.nn.MSELoss()
     optimizer = torch.optim.AdamW(params=model.parameters(),
@@ -81,6 +84,7 @@ def main():
     model.train()
     for epoch in range(1, epochs + 1):
         for graph in graph_list[:-round(cv * year)]:
+            graph = graph.to(args.device)
 
             y_hat = model(graph)
             loss = criterion(y_hat, graph.y)
@@ -97,6 +101,8 @@ def main():
         Y_hat = []
         Y = []
         for graph in graph_list[-round(cv * year):]:
+            graph = graph.to(args.device)
+
             Y_hat.append(model(graph))
             Y.append(graph.y)
 
