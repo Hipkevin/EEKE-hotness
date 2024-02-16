@@ -9,6 +9,8 @@ import util.model
 from torch_geometric.data import Data
 from util.opts import training_opts
 
+from gensim.models import Word2Vec
+
 
 def set_seed(seed=7):
     random.seed(seed)
